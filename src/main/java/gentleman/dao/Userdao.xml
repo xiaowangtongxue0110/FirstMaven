@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="gentleman.dao.Userdao">
+
+    <cache type="org.mybatis.caches.ehcache.EhcacheCache"/>
+
+    <insert id="addUser">
+   INSERT INTO emp(name,password,phone,email) VALUES (#{name},#{password},#{phone},#{email});
+    </insert>
+
+    <select id="selectLogin" resultType="User" >
+        select name,password,phone,email from emp where name=#{name};
+    </select>
+
+    <select id="selectLoginemail" resultType="User" >
+        select name,password,phone,email from emp where email=#{email};
+    </select>
+
+    <select id="selectUserPhone" resultType="User" >
+        select name,password,phone,email from emp where phone=#{phone};
+    </select>
+
+    <select id="selectLoginUserAndPassword" resultType="User" >
+        select * from emp where name = #{username} and password = #{password};
+    </select>
+
+    <select id="selectUser" resultType="User">
+          select * from emp;
+    </select>
+
+    <update id="updateUser">
+        UPDATE emp set name=#{name},password=#{password},phone=#{phone},email=#{email} where id=#{id}
+    </update>
+
+    <select id="selectUserById" resultType="User" flushCache="false">
+        select * from emp where id = #{id};
+    </select>
+
+    <delete id="deleteUserById">
+        delete from emp where id = #{id};
+    </delete>
+
+</mapper>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>管理界面</title>
+    <link href="../images/tipchildren.ico" rel="icon" type="image/x-ico">
+    <link href="../css/bootstrap.css" rel="stylesheet">
+
+</head>
+<body>
+<script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/1.7.2/jquery.min.js"></script>
+<script src="http://itbyc.com/templets/yang/js/snow.js"></script>
+<style type="text/css">.snow-container{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100001;}</style>
+<div class="snow-container"></div>
+<div class="container theme-showcase" role="main">
+
+    <div id="msg"></div>
+    <div class="page-header">
+        <input type="text" id="user-id" name="id" placeholder="请输入id">
+        <button id="query" type="button" class="btn btn-sm btn-primary">查询</button>
+        <button id="return1" type="button" class="btn btn-sm btn-success">返回注册页面</button>
+    </div>
+    <div class="row">
+        <div class="">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>编号</th>
+                    <th>用户名</th>
+                    <th>密码</th>
+                    <th>邮箱</th>
+                    <th>手机</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody id="tbody">
+                <tr>
+                    <td>
+
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script src="../js/jquery-3.3.1.min.js"></script>
+<script src="../js/bootstrap.js"></script>
+<script type="text/javascript">
+
+    /*7Core-CN - 网页鼠标点击特效（爱心）*/
+    !function (e, t, a) {
+        function r() {
+            for (var e = 0; e < s.length; e++) s[e].alpha <= 0 ? (t.body.removeChild(s[e].el), s.splice(e, 1)) : (s[e].y--, s[e].scale += .004, s[e].alpha -= .013, s[e].el.style.cssText = "left:" + s[e].x + "px;top:" + s[e].y + "px;opacity:" + s[e].alpha + ";transform:scale(" + s[e].scale + "," + s[e].scale + ") rotate(45deg);background:" + s[e].color + ";z-index:99999");
+            requestAnimationFrame(r)
+        }
+
+        function n() {
+            var t = "function" == typeof e.onclick && e.onclick;
+            e.onclick = function (e) {
+                t && t(), o(e)
+            }
+        }
+
+        function o(e) {
+            var a = t.createElement("div");
+            a.className = "heart", s.push({
+                el: a,
+                x: e.clientX - 5,
+                y: e.clientY - 5,
+                scale: 1,
+                alpha: 1,
+                color: c()
+            }), t.body.appendChild(a)
+        }
+
+        function i(e) {
+            var a = t.createElement("style");
+            a.type = "text/css";
+            try {
+                a.appendChild(t.createTextNode(e))
+            } catch (t) {
+                a.styleSheet.cssText = e
+            }
+            t.getElementsByTagName("head")[0].appendChild(a)
+        }
+
+        function c() {
+            return "rgb(" + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + ")"
+        }
+
+        var s = [];
+        e.requestAnimationFrame = e.requestAnimationFrame || e.webkitRequestAnimationFrame || e.mozRequestAnimationFrame || e.oRequestAnimationFrame || e.msRequestAnimationFrame || function (e) {
+            setTimeout(e, 1e3 / 60)
+        }, i(".heart{width: 10px;height: 10px;position: fixed;background: #f00;transform: rotate(45deg);-webkit-transform: rotate(45deg);-moz-transform: rotate(45deg);}.heart:after,.heart:before{content: '';width: inherit;height: inherit;background: inherit;border-radius: 50%;-webkit-border-radius: 50%;-moz-border-radius: 50%;position: fixed;}.heart:after{top: -5px;}.heart:before{left: -5px;}"), n(), r()
+    }(window, document);
+</script>
+<script>
+    $(function () {
+        getAll();
+        //绑定修改按钮
+        $("#tbody").on("click", ".btn-warning", function () {
+            var userId = this.parentNode.parentNode.firstChild.innerHTML;
+            console.log(userId);
+            $(location).attr("href", "/html/TestUpdate.html?id=" + userId);
+        });
+        //绑定删除按钮
+        $("#tbody").on("click", ".btn-info", function () {
+            var flag = confirm("是否删除？");
+            if (flag) {
+                deleteUser(this);
+            }
+        });
+
+        $("#query").click(function () {
+            var userId = $("#user-id").val();
+            if (userId != "") {
+                getUserById(userId);
+            } else {
+                getAll();
+            }
+        });
+
+        $("#return1").click(function () {
+            $(location).attr('href', '/html/index.html');
+        });
+
+    });
+
+    function getAll() {
+        $.ajax({
+            url: "/getUser",
+            type: "get",
+            dataType: "json",
+            success: function (result) {
+                var dataTR = "";
+                $.each(result, function (index, value) {
+                    dataTR +=
+                        "<tr>" +
+                        "<td>" + value.id + "</td>" +
+                        "<td>" + value.name + "</td>" +
+                        "<td>" + value.password + "</td>" +
+                        "<td>" + value.phone + "</td>" +
+                        "<td>" + value.email + "</td>" +
+                        "<td>" +
+                        "<button type='button' class='btn btn-sm btn-info' >删除</button>" +
+                        "<button type='button' class='btn btn-sm btn-warning' >修改</button>" +
+                        "</td>" +
+                        "</tr>";
+                });
+                $("#tbody").html(dataTR);
+            }
+        });
+    }
+
+    function deleteUser(obj) {
+        var userId = obj.parentNode.parentNode.firstChild.innerHTML;
+        $.ajax({
+            url: "/deleteUser/" + userId,
+            type: "delete",
+            dataType: "json",
+            success: function (result) {
+                getAll();
+                if (result == "success") {
+                    //提示信息
+                    var msg = '<div class="alert alert-info" role="alert">删除成功!</div>';
+                    $('#msg').html(msg);
+                    setTimeout(function () {
+                        $('#msg').empty();
+                    }, 2000);
+                } else {
+                    //提示信息
+                    var msg = '<div class="alert alert-warning" role="alert">删除失败!</div>';
+                    $('#msg').html(msg);
+
+                    setTimeout(function () {
+                        $('#msg').empty();
+                    }, 2000);
+                }
+            }
+        });
+    }
+
+
+    function getUserById(userId) {
+        $.ajax({
+            url: "/ids/" + userId,
+            type: "get",
+            dataType: "json",
+            success: function (result) {
+                var dataTR =
+                    "<tr>" +
+                    "<td>" + userId + "</td>" +
+                    "<td>" + result.name + "</td>" +
+                    "<td>" + result.password + "</td>" +
+                    "<td>" + result.email + "</td>" +
+                    "<td>" + result.phone + "</td>" +
+                    "<td>" +
+                    "<button type='button' class='btn btn-sm btn-info' >删除</button>" +
+                    "<button type='button' class='btn btn-sm btn-warning' >修改</button>" +
+                    "</td>" +
+                    "</tr>";
+
+                $("#tbody").html(dataTR);
+            }
+        });
+    }
+
+
+</script>

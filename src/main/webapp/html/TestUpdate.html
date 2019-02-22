@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>修改界面</title>
+    <link href="../images/tipchildren.ico" rel="icon" type="image/x-ico">
+    <link href="../css/bootstrap.css" rel="stylesheet">
+</head>
+<body>
+<div class="page-header"></div>
+<div class="container">
+    <form id="user-form" style="max-width: 330px;padding: 15px;margin: 0 auto;" role="form">
+        <input type="hidden" id="id">
+        <div class="form-group">
+            <span id="nickname_span" style="color: red"></span><br>
+            <label for="name">用户名:</label>
+            <input type="text"  class="form-control" id="name" name="name" oninput="findname()"  >
+        </div>
+        <div class="form-group">
+            <span id="password_span" style="color: red"></span><br>
+            <label for="password">密码:</label>
+            <input type="password" class="form-control" id="password" name="password" oninput="checkPassword()">
+        </div>
+        <div class="form-group">
+            <span id="phone_span" style="color: red"></span> <br>
+            <label for="phone">手机:</label>
+            <input type="text" class="form-control" id="phone" name="phone" oninput="checkPhone()">
+        </div>
+        <div class="form-group">
+            <span id="email_span" style="color: red"></span> <br>
+            <label for="email">邮箱:</label>
+            <input type="email" class="form-control" id="email" name="email" oninput="checkEmail()">
+        </div>
+
+        <button type="button" class="btn  btn-primary ">修改</button>
+        <button type="button" class="btn  btn-success">返回</button>
+    </form>
+</div>
+</body>
+<script src="../js/jquery-3.3.1.min.js"></script>
+<script src="../js/bootstrap.js"></script>
+<script>
+            $(function () {
+                  var userId = location.search.split("=");
+                  console.log(userId);
+                  $.ajax({
+                      url:"/ids/"+userId[1],
+                      type:"get",
+                      dataType:"json",
+                      success:function (result) {
+                          $('#name').val(result.name);
+                          $('#password').val(result.password);
+                          $('#phone').val(result.phone);
+                          $('#email').val(result.email);
+                      }
+                  });
+
+            $(".btn-primary").click(function () {
+                var f = findname();
+                var p = checkPassword();
+                var checkEmail1 = checkEmail();
+                var phone = checkPhone();
+                var sub = (f&&p&&checkEmail1&&phone);
+                updater(sub);
+            });
+
+                $(".btn-success").click(function () {
+                    $(location).attr('href', '/html/success.html');
+                });
+
+  });
+
+            function updater(boolean) {
+                if(boolean==false){
+
+                }else if (boolean==true){
+                    var jsonForm= $('#user-form').serializeArray();
+                    var jsonData = {};
+                    $.each(jsonForm,function (i,v) {
+                        jsonData[v.name] = v.value;
+                    }); //参数
+                    var params = JSON.stringify(jsonData);
+                    var userId = location.search.split("=");
+                    $.ajax({
+                        url:"/users/"+userId[1],
+                        type:"put",
+                        dataType:"json",
+                        data:params,
+                        contentType:"application/json",
+                        success:function (result) {
+                            if(result=="success"){
+                                $(location).attr('href','/html/success.html');
+                            }else{
+                                //提示信息
+                                var msg = '<div class="alert alert-warning" role="alert">修改失败!</div>';
+                                $('#msg').html(msg);
+                                setTimeout(function () {
+                                    $('#msg').empty();
+                                },2000);
+                            }
+                        }
+                    });
+                }
+            }
+
+            function checkPassword(){
+                var password=document.getElementById("password").value;
+                var reg=/^[a-zA-Z]\w{5,15}$/;
+                var f = reg.test(password);
+                if(f==false){
+                    document.getElementById("password_span").innerHTML="密码格式错误，是由大写字母和数字构成的！";
+                    return false;
+                }else if(password==""||password==null){
+                    document.getElementById("password_span").innerHTML="密码不能为空！";
+                    return false;
+                }else{
+                    document.getElementById("password_span").innerHTML="";
+                    return true;
+                }
+            }
+            //验证邮箱
+            function checkEmail(){
+                var email=document.getElementById("email").value;
+                //两种引用正则表达式方式
+                //var reg = new RegExp("^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$");
+                var reg=/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/;
+                var f = reg.test(email);
+                var g = false;
+                if(f==false){
+                    document.getElementById("email_span").innerHTML="邮箱格式错误";
+                    return false;
+                }else{
+                    document.getElementById("email_span").innerHTML="";
+                    return true;
+                }
+            }
+            function checkPhone(){
+                var g = false;
+                var phone = document.getElementById('phone').value;
+                if(phone==""){
+                    document.getElementById("phone_span").innerHTML="手机不能为空";
+                }else if(!(/^1[34578]\d{9}$/.test(phone))){
+                    document.getElementById("phone_span").innerHTML="手机格式错误";
+                }else {
+                    document.getElementById("phone_span").innerHTML="";
+                    g = true;
+                }
+                return g;
+            }
+            function findname() {
+                var f = false;
+                var name = $("#name").val();
+                if(name==""){
+                    document.getElementById("nickname_span").innerHTML="用户名不能为空";
+                }else if(name.length<6||name.length>16){
+                    document.getElementById("nickname_span").innerHTML="用户名的长度为6-16位";
+                }else{
+                    document.getElementById("nickname_span").innerHTML="";
+                    f = true;
+                }
+                return f;
+            }
+
+</script>
+</html>
